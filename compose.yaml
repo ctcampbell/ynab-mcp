@@ -1,0 +1,56 @@
+services:
+  ynab-mcp:
+    build: .
+    image: ynab-local-mcp:1.0.0
+    restart: unless-stopped
+    init: true
+    user: "${PUID:-1000}:${PGID:-1000}"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs: [/tmp]
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${PORT:-3000}:3000"
+    environment:
+      HOST: 0.0.0.0
+      PORT: "3000"
+      YNAB_ACCESS_TOKEN_FILE: /run/secrets/ynab_token
+      MCP_AUTHORIZATION_FILE: /run/secrets/mcp_authorization
+      YNAB_ENABLE_WRITES: "${YNAB_ENABLE_WRITES:-false}"
+      YNAB_DEFAULT_PLAN_ID: "${YNAB_DEFAULT_PLAN_ID:-}"
+      YNAB_ALLOWED_PLAN_IDS: "${YNAB_ALLOWED_PLAN_IDS:-}"
+      MCP_ALLOWED_HOSTS: "${MCP_ALLOWED_HOSTS:-localhost,127.0.0.1,[::1],ynab-mcp}"
+      MCP_ALLOWED_ORIGINS: "${MCP_ALLOWED_ORIGINS:-}"
+    secrets: [ynab_token, mcp_authorization]
+
+  tunnel:
+    image: "${TUNNEL_CLIENT_IMAGE:-ghcr.io/openai/tunnel-client:v0.0.15}"
+    command: ["--control-plane.api-key=file:/run/secrets/openai_tunnel_key"]
+    profiles: [chatgpt]
+    restart: unless-stopped
+    init: true
+    user: "${PUID:-1000}:${PGID:-1000}"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs: [/tmp]
+    depends_on:
+      ynab-mcp:
+        condition: service_healthy
+    environment:
+      CONTROL_PLANE_TUNNEL_ID: "${OPENAI_TUNNEL_ID:-}"
+      MCP_SERVER_URL: http://ynab-mcp:3000/mcp
+      MCP_EXTRA_HEADERS: "Authorization: file:/run/secrets/mcp_authorization"
+      MCP_DISCOVERY_EXTRA_HEADERS: "Authorization: file:/run/secrets/mcp_authorization"
+      HEALTH_LISTEN_ADDR: 127.0.0.1:8080
+      LOG_LEVEL: info
+      LOG_FORMAT: json
+    secrets: [mcp_authorization, openai_tunnel_key]
+
+secrets:
+  ynab_token:
+    file: ./.secrets/ynab-token
+  mcp_authorization:
+    file: ./.secrets/mcp-authorization
+  openai_tunnel_key:
+    file: ./.secrets/openai-tunnel-key

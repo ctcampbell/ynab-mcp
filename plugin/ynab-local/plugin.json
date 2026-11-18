@@ -1,0 +1,33 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "ynab-local",
+  "version": "1.0.0",
+  "description": "Read your YNAB budgets, accounts and transactions through your private server, with optional edits.",
+  "keywords": [
+    "ynab",
+    "budget",
+    "personal-finance",
+    "self-hosted"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "YNAB Local",
+        "shortDescription": "Your budget, connected through your home server",
+        "longDescription": "Review YNAB budgets, accounts, categories, upcoming transactions and spending. Edits are disabled by default and can be enabled by the server owner. A personal integration, independent of YNAB.",
+        "category": "Productivity",
+        "capabilities": [
+          "Read",
+          "Write"
+        ],
+        "defaultPrompt": [
+          "Review my budget for this month.",
+          "Find transactions that need approval.",
+          "Show my upcoming scheduled transactions."
+        ],
+        "brandColor": "#226A5A"
+      }
+    }
+  },
+  "license": "MIT"
+}

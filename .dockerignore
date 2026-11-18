@@ -1,0 +1,12 @@
+node_modules
+.pnpm-store
+dist
+artifacts
+.git
+.env
+.env.*
+env
+.secrets
+coverage
+.DS_Store
+*.log

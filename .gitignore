@@ -1,0 +1,17 @@
+# Dependencies and generated output
+node_modules/
+.pnpm-store/
+dist/
+artifacts/
+coverage/
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+env
+.secrets/
+
+# Local system files and logs
+.DS_Store
+*.log
